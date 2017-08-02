@@ -13,43 +13,16 @@ static void cleanup() {
   destroyLevel(&globals.level);
 }
 
-
-static void
-updateKeyChar(unsigned char key, bool state)
+void postRedisplay()
 {
-  switch (key) {
-    case 'w':
-      globals.controls.up = state;
-      break;
-    case 's':
-      globals.controls.down = state;
-      break;
-    case 'a':
-      globals.controls.left = state;
-      break;
-    case 'd':
-      globals.controls.right = state;
-      break;
-    case ' ':
-      globals.controls.jump = state;
-    default:
-      break;
-    }
+  globals.wantRedisplay = 1;
 }
 
-static void
-updateKeyInt(int key, bool state)
+void quit(int code)
 {
-  switch (key) {
-  case GLUT_KEY_LEFT:
-    globals.controls.turnLeft = state;
-    break;
-  case GLUT_KEY_RIGHT:
-    globals.controls.turnRight = state;
-    break;
-  default:
-    break;
-  }
+  SDL_DestroyWindow(globals.window);
+  SDL_Quit();
+  exit(code);
 }
 
 static void
@@ -59,6 +32,227 @@ reshape(int width, int height)
   globals.camera.width = width;
   globals.camera.height = height;
   applyProjectionMatrix(&globals.camera);
+}
+
+updateKey(SDL_KeyboardEvent *e, bool state)
+{
+  case SDLK_w:
+    globals.controls.up = state;
+    break;
+  case SDLK_s:
+    globals.controls.down = state;
+    break;
+  case SDLK_a:
+    globals.controls.left = state;
+    break;
+  case SDLK_d:
+    globals.controls.right = state;
+    break;
+  case SDKL_SPACE:
+    globals.controls.jump = state;
+    break;
+  case SDLK_LEFT:
+    globals.controls.turnLeft = state;
+    break;
+  case SDLK_RIGHT:
+    globals.controls.turnRight = state;
+    break;
+  default:
+    break;
+}
+
+static void mouseMotion(int x, int y)
+{
+  int dX = x - globals.camera.lastX;
+  int dY = y - globals.camera.lastY;
+
+  if (globals.controls.lmb) {
+    globals.camera.xRot += dX * 0.1;
+    globals.camera.yRot += dY * 0.1;
+    globals.camera.yRot = clamp(globals.camera.yRot, 0, 90);
+  }
+
+  if (globals.controls.rmb) {
+    globals.camera.zoom += dY * 0.01;
+    globals.camera.zoom = max(globals.camera.zoom, 0.5);
+  }
+
+  globals.camera.lastX = x;
+  globals.camera.lastY = y;
+}
+
+static void mouseButton(SDL_KeyboardEvent *e, int state, int x, int y)
+{
+  if (state == true) {
+    globals.camera.lastX = x;
+    globals.camera.lastY = y;
+  }
+
+  if (e == SDL_BUTTON_LEFT) {
+    globals.controls.lmb = state;
+  } else if (e == SDL_BUTTON_RIGHT) {
+    globals.controls.rmb = state;
+  }
+}
+
+// key down events
+void keyDown(SDL_KeyboardEvent *e)
+{
+  switch (e->keysym.sym)
+  {
+    case SDLK_ESCAPE:
+      quit(0);
+      break;
+
+    case SDLK_h:
+      globals.halt = !globals.halt;
+      if (globals.halt)
+        printf("Stopping time\n");
+      else
+        printf("Resuming time\n");
+      break;
+
+    case SDLK_l:
+      globals.drawingFlags.lighting = !globals.drawingFlags.lighting;
+      printf("Toggling lighting\n");
+      break;
+
+    case SDLK_t:
+      globals.drawingFlags.textures = !globals.drawingFlags.textures;
+      printf("Toggling textures\n");
+      break;
+
+    case SDLK_n:
+      globals.drawingFlags.normals = !globals.drawingFlags.normals;
+      printf("Toggling normals\n");
+      break;
+
+    case SDLK_o:
+      globals.drawingFlags.axes = !globals.drawingFlags.axes;
+      printf("Toggling axes\n");
+      break;
+
+    case SDLK_m:
+      globals.drawingFlags.rm++;
+      if (globals.drawingFlags.rm >= nrms)
+        globals.drawingFlags.rm = im;
+      printf("Changing RM\n");
+      break;
+
+    case SDLK_p:
+      globals.drawingFlags.wireframe = !globals.drawingFlags.wireframe;
+      if (globals.drawingFlags.wireframe)
+      {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        printf("Using wireframe rendering\n");
+      }
+      else
+      {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        printf("Using filled rendering\n");
+      }
+      break;
+
+    case SDLK_EQUALS:
+      globals.drawingFlags.tess[0] =
+        clamp(globals.drawingFlags.tess[0] * 2, 8, 1024);
+      globals.drawingFlags.tess[1] =
+        clamp(globals.drawingFlags.tess[1] * 2, 8, 1024);
+      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess);
+      generateLevelGeometry(&globals.level, globals.drawingFlags.tess);
+      printf("Tesselation: %zu %zu\n",
+      globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
+      break;
+
+    case SDLK_DASH:
+      globals.drawingFlags.tess[0] =
+        clamp(globals.drawingFlags.tess[0] / 2, 8, 1024);
+      globals.drawingFlags.tess[1] =
+        clamp(globals.drawingFlags.tess[1] / 2, 8, 1024);
+      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess);
+      generateLevelGeometry(&globals.level, globals.drawingFlags.tess);
+      printf("Tesselation: %zu %zu\n",
+      globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
+      break;
+    default:
+      updateKey(e, true);
+      break;
+  }
+}
+
+// Key up events
+void keyUp(SDL_KeyboardEvent *e)
+{
+  updateKey(e, false);
+}
+
+void eventDispatcher()
+{
+  SDL_Event e;
+
+  // Handle events
+  while (SDL_PollEvent(&e))
+  {
+    switch (e.type)
+    {
+      case SDL_QUIT:
+        if (debug)
+          printf("Quit\n");
+        quit(0);
+        break;
+      case SDL_MOUSEMOTION:
+        //insert mouse movement here
+        mouseMotion(e.button.x, e.button.y);
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        //insert mouse button down here
+        mouseButton(e.button.button, true, e.button.x, e.button.y);
+        break;
+      case SDL_MOUSEBUTTONUP:
+        //inster mouse button up here;
+        mouseButton(e.button.button, false, e.button.x, e.button.y);
+        break;
+      case SDL_KEYDOWN:
+        keyDown(&e.key);
+        break;
+      case SDL_KEYUP:
+        keyUp(&e.key);
+        break;
+      case SDL_WINDOWEVENT:
+        if (debug)
+          printf("Window event %d\n", e.window.event);
+        switch (e.window.event)
+        {
+          case SDL_WINDOWEVENT_SHOWN:
+            if (debug)
+              SDL_Log("Window %d shown", e.window.windowID);
+              break;
+          case SDL_WINDOWEVENT_SIZE_CHANGED:
+            if (debug)
+              printf("SDL_WINDOWEVENT_SIZE_CHANGED\n");
+            break;
+          case SDL_WINDOWEVENT_RESIZED:
+            if (debug)
+              printf("SDL_WINDOWEVENT_RESIZED.\n");
+            if (e.window.windowID == SDL_GetWindowID(window))
+            {
+              SDL_SetWindowSize(window, e.window.data1, e.window.data2);
+              reshape(e.window.data1, e.window.data2);
+              postRedisplay();
+            }
+            break;
+          case SDL_WINDOWEVENT_CLOSE:
+            if (debug)
+              printf("Window close event\n");
+            break;
+          default:
+            break;
+        }
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 static void
@@ -76,7 +270,7 @@ render()
 
   displayOSD(&globals.counters, &globals.drawingFlags);
 
-  glutSwapBuffers();
+  SDL_GL_SwapWindow(window);
 
   globals.counters.frameCount++;
 }
@@ -85,7 +279,7 @@ static void
 update()
 {
   static int tLast = -1;
-	
+
   if (tLast < 0)
     tLast = glutGet(GLUT_ELAPSED_TIME);
 
@@ -105,167 +299,16 @@ update()
 }
 
 static void
-keyDown(unsigned char key, int x, int y)
-{
-  UNUSED(x);
-  UNUSED(y);
-
-  switch (key)
-    {
-    case 27:
-    case 'q':
-      cleanup();
-      exit(EXIT_SUCCESS);
-      break;
-    case 'h':
-      globals.halt = !globals.halt;
-      if (globals.halt)
-	printf("Stopping time\n");
-      else
-	printf("Resuming time\n");
-      break;
-    case 'l':
-      globals.drawingFlags.lighting = !globals.drawingFlags.lighting;
-      printf("Toggling lighting\n");
-      break;
-    case 't':
-      globals.drawingFlags.textures = !globals.drawingFlags.textures;
-      printf("Toggling textures\n");
-      break;
-    case 'n':
-      globals.drawingFlags.normals = !globals.drawingFlags.normals;
-      printf("Toggling normals\n");
-      break;
-    case 'o':
-      globals.drawingFlags.axes = !globals.drawingFlags.axes;
-      printf("Toggling axes\n");
-      break;
-    case 'm':
-      globals.drawingFlags.rm++;
-      if (globals.drawingFlags.rm >= nrms)
-	globals.drawingFlags.rm = im;
-      printf("Changing RM\n");
-      break;
-    case 'p':
-      globals.drawingFlags.wireframe = !globals.drawingFlags.wireframe;
-      if (globals.drawingFlags.wireframe) {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	printf("Using wireframe rendering\n");
-      } else {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	printf("Using filled rendering\n");
-      }
-      break;
-    case '+':
-    case '=':
-      globals.drawingFlags.tess[0] =
-	clamp(globals.drawingFlags.tess[0] * 2, 8, 1024);
-      globals.drawingFlags.tess[1] =
-	clamp(globals.drawingFlags.tess[1] * 2, 8, 1024);
-      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess);
-      generateLevelGeometry(&globals.level, globals.drawingFlags.tess);
-      printf("Tesselation: %zu %zu\n",
-	     globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
-      break;
-    case '-':
-      globals.drawingFlags.tess[0] =
-	clamp(globals.drawingFlags.tess[0] / 2, 8, 1024);
-      globals.drawingFlags.tess[1] =
-	clamp(globals.drawingFlags.tess[1] / 2, 8, 1024);
-      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess);
-      generateLevelGeometry(&globals.level, globals.drawingFlags.tess);
-      printf("Tesselation: %zu %zu\n",
-	     globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
-      break;
-    default:
-      updateKeyChar(key, true); // player controls are updated here and processed on each frame
-      break;
-    }
-
-  glutPostRedisplay();
-}
-
-static void
-keyUp(unsigned char key, int x, int y)
-{
-  UNUSED(x);
-  UNUSED(y);
-
-  updateKeyChar(key, false);
-}
-
-static void
-specialKeyDown(int key, int x, int y)
-{
-  UNUSED(x);
-  UNUSED(y);
-
-  switch(key)
-    {
-    default:
-      updateKeyInt(key, true);
-      break;
-    }
-
-  glutPostRedisplay();
-}
-
-static void
-specialKeyUp(int key, int x, int y)
-{
-  UNUSED(x);
-  UNUSED(y);
-
-  updateKeyInt(key, false);
-}
-
-static void
-mouseMotion(int x, int y)
-{
-  int dX = x - globals.camera.lastX;
-  int dY = y - globals.camera.lastY;
-
-  if (globals.controls.lmb) {
-    globals.camera.xRot += dX * 0.1;
-    globals.camera.yRot += dY * 0.1;
-    globals.camera.yRot = clamp(globals.camera.yRot, 0, 90);
-  }
-	
-  if (globals.controls.rmb) {
-    globals.camera.zoom += dY * 0.01;
-    globals.camera.zoom = max(globals.camera.zoom, 0.5);
-  }
-
-  globals.camera.lastX = x;
-  globals.camera.lastY = y;
-
-  glutPostRedisplay();
-}
-
-static void
-mouseButton(int button, int state, int x, int y)
-{
-  if (state == GLUT_DOWN) {
-    globals.camera.lastX = x;
-    globals.camera.lastY = y;
-  }
-
-  if (button == GLUT_LEFT_BUTTON) {
-    globals.controls.lmb = state == GLUT_DOWN;
-  } else if (button == GLUT_RIGHT_BUTTON) {
-    globals.controls.rmb = state == GLUT_DOWN;
-  }
-
-  glutPostRedisplay();
-}
-
-static void
 init()
 {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHT0);
   glEnable(GL_NORMALIZE);
+
+  glClearColor (0.0, 0.0, 0.0, 0.0);
+  glShadeModel (GL_FLAT);
+  glColor3f(1.0, 1.0, 1.0);
 
   globals.drawingFlags.tess[0] = 8;
   globals.drawingFlags.tess[1] = 8;
@@ -280,29 +323,74 @@ init()
   globals.camera.pos = globals.player.pos;
   globals.camera.width = 800;
   globals.camera.height = 600;
+
+  globals.wantRedisplay = 1;
+}
+
+void mainLoop()
+{
+  while (1) {
+    eventDispatcher();
+    if (gloabls.wantRedisplay) {
+      render();
+      gloabls.wantRedisplay = 0;
+    }
+    update();
+  }
+}
+
+int initGraphics()
+{
+  SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+  window =
+    SDL_CreateWindow("Robot Arm Using SDL2",
+         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+         640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+  if (!globals.window) {
+    fprintf(stderr, "%s:%d: create window failed: %s\n",
+      __FILE__, __LINE__, SDL_GetError());
+    exit(EXIT_FAILURE);
+  }
+
+  SDL_GLContext mainGLContext = SDL_GL_CreateContext(globals.window);
+  if (mainGLContext == 0) {
+    fprintf(stderr, "%s:%d: create context failed: %s\n",
+      __FILE__, __LINE__, SDL_GetError());
+    exit(EXIT_FAILURE);
+  }
+
+  int w, h;
+  SDL_GetWindowSize(window, &w, &h);
+  reshape(w, h);
+}
+
+void sys_shutdown()
+{
+  SDL_Quit();
 }
 
 int
 main(int argc, char **argv)
 {
-  glutInit(&argc, argv);
-  glutInitWindowSize(800, 600);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-  glutCreateWindow("Frogger Microbenchmark");
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    fprintf(stderr, "%s:%d: unable to init SDL: %s\n",
+      __FILE__, __LINE__, SDL_GetError());
+    exit(EXIT_FAILURE);
+  }
 
-  glutDisplayFunc(render);
-  glutIdleFunc(update);
-  glutKeyboardFunc(keyDown);
-  glutKeyboardUpFunc(keyUp);
-  glutSpecialFunc(specialKeyDown);
-  glutSpecialUpFunc(specialKeyUp);
-  glutMotionFunc(mouseMotion);
-  glutMouseFunc(mouseButton);
-  glutReshapeFunc(reshape);
+  if (!initGraphics()) {
+      SDL_Quit();
+      return EXIT_FAILURE;
+  }
 
   init();
 
-  glutMainLoop();
+  mainLoop();
 
   return EXIT_SUCCESS;
 }

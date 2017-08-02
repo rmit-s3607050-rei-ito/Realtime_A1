@@ -18,4 +18,6 @@ typedef struct {
   DrawingFlags drawingFlags;
   Counters counters;
   bool halt;
+  int wantRedisplay;
+  SDL_Window *window;
 } Globals;
