@@ -275,6 +275,8 @@ render()
 
   SDL_GL_SwapWindow(globals.window);
 
+  //glutSwapBuffers();
+
   globals.counters.frameCount++;
 }
 
@@ -304,10 +306,10 @@ update()
 static void
 init()
 {
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  // glEnable(GL_DEPTH_TEST);
-  // glEnable(GL_LIGHT0);
-  // glEnable(GL_NORMALIZE);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_NORMALIZE);
 
   glClearColor (0.0, 0.0, 0.0, 0.0);
   glShadeModel (GL_FLAT);
