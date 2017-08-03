@@ -34,31 +34,34 @@ reshape(int width, int height)
   applyProjectionMatrix(&globals.camera);
 }
 
-updateKey(SDL_KeyboardEvent *e, bool state)
+static void updateKey(SDL_KeyboardEvent *e, bool state)
 {
-  case SDLK_w:
-    globals.controls.up = state;
-    break;
-  case SDLK_s:
-    globals.controls.down = state;
-    break;
-  case SDLK_a:
-    globals.controls.left = state;
-    break;
-  case SDLK_d:
-    globals.controls.right = state;
-    break;
-  case SDKL_SPACE:
-    globals.controls.jump = state;
-    break;
-  case SDLK_LEFT:
-    globals.controls.turnLeft = state;
-    break;
-  case SDLK_RIGHT:
-    globals.controls.turnRight = state;
-    break;
-  default:
-    break;
+  switch (e->keysym.sym)
+  {
+    case SDLK_w:
+      globals.controls.up = state;
+      break;
+    case SDLK_s:
+      globals.controls.down = state;
+      break;
+    case SDLK_a:
+      globals.controls.left = state;
+      break;
+    case SDLK_d:
+      globals.controls.right = state;
+      break;
+    case SDLK_SPACE:
+      globals.controls.jump = state;
+      break;
+    case SDLK_LEFT:
+      globals.controls.turnLeft = state;
+      break;
+    case SDLK_RIGHT:
+      globals.controls.turnRight = state;
+      break;
+    default:
+      break;
+  }
 }
 
 static void mouseMotion(int x, int y)
@@ -81,16 +84,16 @@ static void mouseMotion(int x, int y)
   globals.camera.lastY = y;
 }
 
-static void mouseButton(SDL_KeyboardEvent *e, int state, int x, int y)
+static void mouseButton(SDL_MouseButtonEvent *e, int state, int x, int y)
 {
   if (state == true) {
     globals.camera.lastX = x;
     globals.camera.lastY = y;
   }
 
-  if (e == SDL_BUTTON_LEFT) {
+  if (e->button == SDL_BUTTON_LEFT) {
     globals.controls.lmb = state;
-  } else if (e == SDL_BUTTON_RIGHT) {
+  } else if (e->button == SDL_BUTTON_RIGHT) {
     globals.controls.rmb = state;
   }
 }
@@ -101,6 +104,7 @@ void keyDown(SDL_KeyboardEvent *e)
   switch (e->keysym.sym)
   {
     case SDLK_ESCAPE:
+      cleanup();
       quit(0);
       break;
 
@@ -164,7 +168,7 @@ void keyDown(SDL_KeyboardEvent *e)
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
 
-    case SDLK_DASH:
+    case SDLK_MINUS:
       globals.drawingFlags.tess[0] =
         clamp(globals.drawingFlags.tess[0] / 2, 8, 1024);
       globals.drawingFlags.tess[1] =
@@ -196,21 +200,18 @@ void eventDispatcher()
     switch (e.type)
     {
       case SDL_QUIT:
-        if (debug)
+        if (globals.debug)
           printf("Quit\n");
         quit(0);
         break;
       case SDL_MOUSEMOTION:
-        //insert mouse movement here
         mouseMotion(e.button.x, e.button.y);
         break;
       case SDL_MOUSEBUTTONDOWN:
-        //insert mouse button down here
-        mouseButton(e.button.button, true, e.button.x, e.button.y);
+        mouseButton(&e.button, true, e.button.x, e.button.y);
         break;
       case SDL_MOUSEBUTTONUP:
-        //inster mouse button up here;
-        mouseButton(e.button.button, false, e.button.x, e.button.y);
+        mouseButton(&e.button, false, e.button.x, e.button.y);
         break;
       case SDL_KEYDOWN:
         keyDown(&e.key);
@@ -219,30 +220,30 @@ void eventDispatcher()
         keyUp(&e.key);
         break;
       case SDL_WINDOWEVENT:
-        if (debug)
+        if (globals.debug)
           printf("Window event %d\n", e.window.event);
         switch (e.window.event)
         {
           case SDL_WINDOWEVENT_SHOWN:
-            if (debug)
+            if (globals.debug)
               SDL_Log("Window %d shown", e.window.windowID);
-              break;
+            break;
           case SDL_WINDOWEVENT_SIZE_CHANGED:
-            if (debug)
+            if (globals.debug)
               printf("SDL_WINDOWEVENT_SIZE_CHANGED\n");
             break;
           case SDL_WINDOWEVENT_RESIZED:
-            if (debug)
+            if (globals.debug)
               printf("SDL_WINDOWEVENT_RESIZED.\n");
-            if (e.window.windowID == SDL_GetWindowID(window))
+            if (e.window.windowID == SDL_GetWindowID(globals.window))
             {
-              SDL_SetWindowSize(window, e.window.data1, e.window.data2);
+              SDL_SetWindowSize(globals.window, e.window.data1, e.window.data2);
               reshape(e.window.data1, e.window.data2);
               postRedisplay();
             }
             break;
           case SDL_WINDOWEVENT_CLOSE:
-            if (debug)
+            if (globals.debug)
               printf("Window close event\n");
             break;
           default:
@@ -253,6 +254,8 @@ void eventDispatcher()
         break;
     }
   }
+
+  postRedisplay();
 }
 
 static void
@@ -270,7 +273,7 @@ render()
 
   displayOSD(&globals.counters, &globals.drawingFlags);
 
-  SDL_GL_SwapWindow(window);
+  SDL_GL_SwapWindow(globals.window);
 
   globals.counters.frameCount++;
 }
@@ -281,9 +284,9 @@ update()
   static int tLast = -1;
 
   if (tLast < 0)
-    tLast = glutGet(GLUT_ELAPSED_TIME);
+    tLast = SDL_GetTicks();
 
-  int t = glutGet(GLUT_ELAPSED_TIME);
+  int t = SDL_GetTicks();
   int dtMs = t - tLast;
   float dt = (float)dtMs / 1000.0f;
   tLast = t;
@@ -294,17 +297,17 @@ update()
     updateCounters(&globals.counters, t);
     globals.camera.pos = globals.player.pos;
 
-    glutPostRedisplay();
+    postRedisplay();
   };
 }
 
 static void
 init()
 {
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_NORMALIZE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  // glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_LIGHT0);
+  // glEnable(GL_NORMALIZE);
 
   glClearColor (0.0, 0.0, 0.0, 0.0);
   glShadeModel (GL_FLAT);
@@ -325,15 +328,16 @@ init()
   globals.camera.height = 600;
 
   globals.wantRedisplay = 1;
+  globals.debug = true;
 }
 
 void mainLoop()
 {
   while (1) {
     eventDispatcher();
-    if (gloabls.wantRedisplay) {
+    if (globals.wantRedisplay) {
       render();
-      gloabls.wantRedisplay = 0;
+      globals.wantRedisplay = 0;
     }
     update();
   }
@@ -347,10 +351,10 @@ int initGraphics()
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-  window =
-    SDL_CreateWindow("Robot Arm Using SDL2",
+  globals.window =
+    SDL_CreateWindow("Frogger Using SDL2",
          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-         640, 480, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+         800, 800, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (!globals.window) {
     fprintf(stderr, "%s:%d: create window failed: %s\n",
       __FILE__, __LINE__, SDL_GetError());
@@ -365,7 +369,7 @@ int initGraphics()
   }
 
   int w, h;
-  SDL_GetWindowSize(window, &w, &h);
+  SDL_GetWindowSize(globals.window, &w, &h);
   reshape(w, h);
 }
 
@@ -377,6 +381,8 @@ void sys_shutdown()
 int
 main(int argc, char **argv)
 {
+  glutInit(&argc, argv);
+
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     fprintf(stderr, "%s:%d: unable to init SDL: %s\n",
       __FILE__, __LINE__, SDL_GetError());
@@ -389,6 +395,8 @@ main(int argc, char **argv)
   }
 
   init();
+
+  atexit(sys_shutdown);
 
   mainLoop();
 

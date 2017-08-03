@@ -6,7 +6,7 @@
 
 const float milli = 1000.0f;
 
-// On screen display 
+// On screen display
 void
 displayOSD(Counters *ctrs, DrawingFlags *dfs)
 {
@@ -15,7 +15,7 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
   int w, h;
   const int rm = 150, vs = 20;
 
-    
+
   glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
@@ -24,7 +24,7 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
   glPushMatrix();
   glLoadIdentity();
 
-  /* Set up orthographic coordinate system to match the window, 
+  /* Set up orthographic coordinate system to match the window,
      i.e. (0,0)-(w,h) */
   w = glutGet(GLUT_WINDOW_WIDTH);
   h = glutGet(GLUT_WINDOW_HEIGHT);
@@ -59,10 +59,10 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
 
   glPopMatrix();  /* Pop modelview */
-  
+
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();  /* Pop projection */
-  
+
   glMatrixMode(GL_MODELVIEW);
 
   glPopAttrib();

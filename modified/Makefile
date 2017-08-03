@@ -16,7 +16,7 @@ LDFLAGS =
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	# Linux
-	LDFLAGS += -lm -lGL -lGLU -lglut -D_LINUX ./lib/libSOIL.a
+	LDFLAGS += -lm -lGL -lGLU -lglut -lSDL2 -D_LINUX ./lib/libSOIL.a
 	CFLAGS += 
 endif
 ifeq ($(UNAME_S),Darwin)
