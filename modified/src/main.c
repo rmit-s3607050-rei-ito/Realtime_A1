@@ -369,10 +369,6 @@ int initGraphics()
       __FILE__, __LINE__, SDL_GetError());
     exit(EXIT_FAILURE);
   }
-
-  int w, h;
-  SDL_GetWindowSize(globals.window, &w, &h);
-  reshape(w, h);
 }
 
 void sys_shutdown()
@@ -397,6 +393,10 @@ main(int argc, char **argv)
   }
 
   init();
+
+  int w, h;
+  SDL_GetWindowSize(globals.window, &w, &h);
+  reshape(w, h);
 
   atexit(sys_shutdown);
 
