@@ -103,7 +103,9 @@ void keyDown(SDL_KeyboardEvent *e)
 {
   switch (e->keysym.sym)
   {
-    case SDLK_ESCAPE:
+    case SDLK_q:
+      if (globals.debug)
+        printf("Quit\n");
       cleanup();
       quit(0);
       break;
@@ -199,11 +201,6 @@ void eventDispatcher()
   {
     switch (e.type)
     {
-      case SDL_QUIT:
-        if (globals.debug)
-          printf("Quit\n");
-        quit(0);
-        break;
       case SDL_MOUSEMOTION:
         mouseMotion(e.button.x, e.button.y);
         break;
@@ -275,8 +272,6 @@ render()
 
   SDL_GL_SwapWindow(globals.window);
 
-  //glutSwapBuffers();
-
   globals.counters.frameCount++;
 }
 
@@ -298,6 +293,8 @@ update()
     updateLevel(&globals.level, dt);
     updateCounters(&globals.counters, t);
     globals.camera.pos = globals.player.pos;
+
+    //printf("%f\n", 1.0 / globals.counters.frameTime*1000.0f);
 
     postRedisplay();
   };
@@ -356,7 +353,7 @@ int initGraphics()
   globals.window =
     SDL_CreateWindow("Frogger Using SDL2",
          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-         800, 800, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+         800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (!globals.window) {
     fprintf(stderr, "%s:%d: create window failed: %s\n",
       __FILE__, __LINE__, SDL_GetError());
@@ -380,6 +377,9 @@ int
 main(int argc, char **argv)
 {
   glutInit(&argc, argv);
+  glutInitWindowSize(800, 600);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+  glutCreateWindow("GLUT OSD");
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     fprintf(stderr, "%s:%d: unable to init SDL: %s\n",
