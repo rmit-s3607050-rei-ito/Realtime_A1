@@ -5,6 +5,7 @@
 #include "level.h"
 #include "counters.h"
 #include "OSD.h"
+#include "bench.h"
 
 Globals globals;
 
@@ -293,6 +294,14 @@ update()
     updateLevel(&globals.level, dt);
     updateCounters(&globals.counters, t);
     globals.camera.pos = globals.player.pos;
+
+    //if(bench)
+    //{
+    //  float fr = 1.0 / globals.counters.frameTime*1000.0f;
+    //  float ft = ctrs->frameTime;
+    //  float ts = (triangle counter);
+    //  saveBench(fr, ft, ts);
+    //}
 
     //printf("%f\n", 1.0 / globals.counters.frameTime*1000.0f);
 

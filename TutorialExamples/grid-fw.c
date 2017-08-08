@@ -320,7 +320,6 @@ void drawGrid2DVBOs(int rows, int cols)
 
    // 2. Set vertex pointer using BUFFER_OFFSET defined variable
    // PARAMS: (NumCoordsPerVertex, TypeOfEachCoord, ByteOffSet, PointerLocation)
-   #define BUFFER_OFFSET(i) ((void*)(i))
    glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
 
    // 3. Bind index VBO
