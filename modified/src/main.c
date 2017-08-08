@@ -181,6 +181,11 @@ void keyDown(SDL_KeyboardEvent *e)
       printf("Tesselation: %zu %zu\n",
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
+
+    case SDLK_u:
+      globals.OSD = !globals.OSD;
+      break;
+
     default:
       updateKey(e, true);
       break;
@@ -269,7 +274,8 @@ render()
   renderPlayer(&globals.player, &globals.drawingFlags);
   renderLevel(&globals.level, &globals.drawingFlags);
 
-  displayOSD(&globals.counters, &globals.drawingFlags);
+  if (globals.OSD)
+    displayOSD(&globals.counters, &globals.drawingFlags);
 
   SDL_GL_SwapWindow(globals.window);
 
@@ -295,15 +301,13 @@ update()
     updateCounters(&globals.counters, t);
     globals.camera.pos = globals.player.pos;
 
-    //if(bench)
-    //{
-    //  float fr = 1.0 / globals.counters.frameTime*1000.0f;
-    //  float ft = ctrs->frameTime;
-    //  float ts = (triangle counter);
-    //  saveBench(fr, ft, ts);
-    //}
-
-    //printf("%f\n", 1.0 / globals.counters.frameTime*1000.0f);
+    if(globals.bench)
+    {
+      float fr = 1.0/globals.counters.frameTime*1000.0f;
+      float ft = globals.counters.frameTime;
+      if (!isinf(fr))
+        saveBench(fr, ft, 0);
+    }
 
     postRedisplay();
   };
@@ -337,13 +341,36 @@ init()
 
   globals.wantRedisplay = 1;
   globals.debug = true;
+
+  globals.bench = true;
+
+  globals.OSD = true;
+
+  if (globals.bench)
+  {
+    initBench
+    (
+      globals.drawingFlags.tess[0],
+      true, //im
+      globals.drawingFlags.wireframe, //rm
+      globals.drawingFlags.lighting,
+      1, //num lights
+      globals.drawingFlags.normals
+    );
+  }
 }
 
 void mainLoop()
 {
-  while (1) {
+  while (1)
+  {
+    if (globals.bench)
+      startBench(&globals.player);
+
     eventDispatcher();
-    if (globals.wantRedisplay) {
+
+    if (globals.wantRedisplay)
+    {
       render();
       globals.wantRedisplay = 0;
     }

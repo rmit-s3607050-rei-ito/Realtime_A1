@@ -1,11 +1,13 @@
 #include "util.h"
+#include "controls.h"
+#include "player.h"
 
-#define STR_LEN 255;
+#define STR_LEN 255
 
 typedef struct
 {
-  File *file;
-  int tessalation;
+  FILE *file;
+  int tessellation;
   bool iMode;
   bool rMode;
   bool lighting;
@@ -13,6 +15,9 @@ typedef struct
   int nLights;
 } BenchParams;
 
-void initBench();
-void startBench();
-void saveBench(float fpr, float ft, float tps, BenchParams params);
+void initBench(int tess, bool iMode, bool rMode, bool light, int nLights,
+  bool normals);
+// void startBench(Controls *controls);
+void startBench(Player *controls);
+void saveBench(float fr, float ft, float tps);
+char *fileName(BenchParams bench);

@@ -21,4 +21,6 @@ typedef struct {
   int wantRedisplay;
   SDL_Window *window;
   bool debug;
+  bool bench;
+  bool OSD;
 } Globals;
