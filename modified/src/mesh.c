@@ -33,12 +33,52 @@ static Vertex cubeVerts[] = {
   { { 1.0, -1.0, -1.0 }, { 0.0, -1.0,  0.0 }, { 0, 1 }, },
   { { 1.0, -1.0,  1.0 }, { 0.0, -1.0,  0.0 }, { 1, 1 }, },
   { { -1.0, -1.0,  1.0 }, { 0.0, -1.0,  0.0 }, { 1, 0 }, },
-}; 
+};
 
 static unsigned int cubeIndices[] = {
   0,  1,  2,  0,  2,  3,  4,  5,  6,  4,  6,  7,  8,  9, 10,  8, 10, 11,
   12, 13, 14, 12, 14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
 };
+
+/*
+ * Initialize VBOs, by generating buffers for verticies and indices
+ */
+void
+initVBOs() {
+  glGenBuffers(1, &mesh->verts);
+  glGenBuffers(1, &mesh->indices);
+}
+
+void bindVBOs()
+{
+  // Bind buffers, then add data into buffer for both verticies and indices
+  // [1]. Verticies
+  glBindBuffer(GL_ARRAY_BUFFER, mesh->verts);
+  glBufferData(GL_ARRAY_BUFFER, mesh->numVerts * sizeof(Vertex),
+               mesh->verts, GL_STATIC_DRAW);
+  // [2]. Indices
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indices);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numIndices * sizeof(unsigned int),
+               mesh->indices, GL_STATIC_DRAW);
+}
+
+void unbindVBOs()
+{
+   /* Unbind buffers of VBOs when switching rendering mode (empty them), binding
+    * done when rendering mode switched to VBO
+    */
+   int buffer;
+
+   // [1]. Array Buffers (Verticies)
+   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &buffer);
+   if (buffer != 0)
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+   // [2]. Element Array Buffers (Indices)
+   glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &buffer);
+   if (buffer != 0)
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
 
 /*
  * Allocate the memory for a mesh with the specifed number of vertices
@@ -102,7 +142,8 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT, mesh->indices);
 
     glPopClientAttrib();
-  } else if (flags->rm == im) {
+  }
+  else if (flags->rm == im) {
     // Specify everything one vertex at a time using glBegin and glEnd
     glBegin(GL_TRIANGLES);
     for (size_t i = 0; i < mesh->numIndices; ++i) {
@@ -112,6 +153,18 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
       submitVertex(mesh->verts[index].pos);
     }
     glEnd();
+  }
+  else if (flags->rm == VBO) {
+      glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+
+      glEnableClientState(GL_VERTEX_ARRAY);
+
+      glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
+
+      glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
+                     BUFFER_OFFSET(mesh->indices * sizeof(unsigned int)));
+
+      glPopClientAttrib();
   }
 
   glPopAttrib();
@@ -218,7 +271,7 @@ createPlaneRowMajor(float width, float height, size_t rows, size_t cols)
       mesh->indices[index++] = (i + 1) * (cols + 1) + j + 1;
     }
   }
-  
+
   return mesh;
 }
 
@@ -315,7 +368,7 @@ createCylinder(size_t stacks, size_t slices, float radius)
   // The texture coordinates for these might not work for radius
   // greater than 1, you might need to enable GL_REPEAT for texture wrap
   size_t endcapVerts = (slices + 1) * (stacks + 1);
-  
+
   for (size_t i = 0; i <= slices; ++i) {
     u = i * du;
     float x = radius * cosf(u);
@@ -392,7 +445,7 @@ drawParabola(Vec3f color, Vec3f vel, float g, DrawingFlags* flags)
 
     Vec3f a = { t0 * vel.x, t0 * vel.y - 0.5 * g * t0 * t0, t0 * vel.z };
     Vec3f b = { t1 * vel.x, t1 * vel.y - 0.5 * g * t1 * t1, t1 * vel.z };
-		
+
     drawLine(color, a, b);
 
     if (flags->normals) {

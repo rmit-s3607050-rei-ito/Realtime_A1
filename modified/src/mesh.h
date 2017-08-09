@@ -29,6 +29,14 @@ typedef struct {
   size_t numVerts, numIndices;
 } Mesh;
 
+/*
+ * VBO related variables and functions
+ */
+#define BUFFER_OFFSET(i) ((void*)(i))
+void initVBOs();
+void bindVBOs();
+void unbindVBOs();
+
 Mesh* createMesh(size_t numVerts, size_t numIndices);
 void destroyMesh(Mesh* mesh);
 void renderMesh(Mesh* mesh, DrawingFlags* flags);
