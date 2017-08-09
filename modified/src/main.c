@@ -6,34 +6,9 @@
 #include "counters.h"
 #include "OSD.h"
 #include "bench.h"
+#include "lighting.h"
 
 Globals globals;
-
-//static float lightPos1[];
-//
-//void initLightPos()
-//{
-//  lightPos1[] = { 1, 1, 1, 0};
-//  //lightPos[1] = { -1, 1, 1, 0 };
-//  //lightPos[2] = { -1, -1, 1, 0 };
-//  //lightPos[3] = { 1, -1, 1, 0 };
-//  //lightPos[4] = { -1, -1, -1, 0 };
-//  //lightPos[5] = { -1, 1, -1, 0 };
-//  //lightPos[6] = { 1, 1, -1, 0 };
-//  //lightPos[7] = { 1, -1, -1 ,0 };
-//}
-//
-//void renderLights()
-//{
-//  for (int i = 0; i < globals.nLights; i++)
-//    glLightfv(GL_LIGHT0+i, GL_POSITION, lightPos1);
-//}
-//
-//void enableLights()
-//{
-//  for (int i = 0; i < globals.nLights; i++)
-//    glEnable(GL_LIGHT0+i);
-//}
 
 static void cleanup() {
   destroyPlayer(&globals.player);
@@ -307,7 +282,7 @@ render()
   static float lightPos[] = { 1, 1, 1, 0 };
   glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-  //renderLights();
+  //renderLights(globals.nLights);
 
   renderPlayer(&globals.player, &globals.drawingFlags);
   renderLevel(&globals.level, &globals.drawingFlags);
@@ -365,8 +340,7 @@ init()
 
   glEnable(GL_LIGHT0);
 
-  //initLightPos();
-  //enableLights();
+  //enableLights(globals.nLights);
 
   glEnable(GL_NORMALIZE);
 
@@ -385,6 +359,7 @@ init()
   initLevel(&globals.level, &globals.drawingFlags);
   initCamera(&globals.camera);
   initCounters(&globals.counters);
+  //initLightPos();
 
   globals.camera.pos = globals.player.pos;
   globals.camera.width = 800;
