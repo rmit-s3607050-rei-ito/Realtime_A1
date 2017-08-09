@@ -44,20 +44,20 @@ static unsigned int cubeIndices[] = {
  * Initialize VBOs, by generating buffers for verticies and indices
  */
 void
-initVBOs() {
-  glGenBuffers(1, &mesh->verts);
-  glGenBuffers(1, &mesh->indices);
+initVBOs(Mesh *mesh) {
+  glGenBuffers(1, &mesh->vbo);
+  glGenBuffers(1, &mesh->ibo);
 }
 
-void bindVBOs()
+void bindVBOs(Mesh *mesh)
 {
   // Bind buffers, then add data into buffer for both verticies and indices
   // [1]. Verticies
-  glBindBuffer(GL_ARRAY_BUFFER, mesh->verts);
+  glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
   glBufferData(GL_ARRAY_BUFFER, mesh->numVerts * sizeof(Vertex),
                mesh->verts, GL_STATIC_DRAW);
   // [2]. Indices
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indices);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numIndices * sizeof(unsigned int),
                mesh->indices, GL_STATIC_DRAW);
 }
@@ -153,18 +153,16 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
       submitVertex(mesh->verts[index].pos);
     }
     glEnd();
+    unbindVBOs();
   }
   else if (flags->rm == VBO) {
-      glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+      initVBOs(mesh);
+      bindVBOs(mesh);
 
       glEnableClientState(GL_VERTEX_ARRAY);
-
       glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
-
-      glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
-                     BUFFER_OFFSET(mesh->indices * sizeof(unsigned int)));
-
-      glPopClientAttrib();
+      // glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
+      //                BUFFER_OFFSET(mesh->numIndices * sizeof(unsigned int)));
   }
 
   glPopAttrib();

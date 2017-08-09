@@ -11,13 +11,13 @@ OBJ_DIR := obj
 
 
 CFLAGS := -Wall -Wextra -std=c11 -g -I$(SRC_DIR) -I inc
-LDFLAGS = 
+LDFLAGS =
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	# Linux
-	LDFLAGS += -lm -lGL -lGLU -lglut -lSDL2 -D_LINUX ./lib/libSOIL.a
-	CFLAGS += 
+	LDFLAGS += -lm -lGL -lGLU -lglut -lSDL2 -lGLEW -D_LINUX ./lib/libSOIL.a
+	CFLAGS +=
 endif
 ifeq ($(UNAME_S),Darwin)
 	# OSX

@@ -27,6 +27,7 @@ typedef struct {
   Vertex* verts;
   unsigned int* indices;
   size_t numVerts, numIndices;
+  unsigned vbo, ibo;
 } Mesh;
 
 /*
