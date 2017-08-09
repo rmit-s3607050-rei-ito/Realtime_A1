@@ -92,6 +92,8 @@ createMesh(size_t numVerts, size_t numIndices)
   mesh->numIndices = numIndices;
   mesh->verts = (Vertex*) calloc(numVerts, sizeof(Vertex));
   mesh->indices = (unsigned int*) calloc(numIndices, sizeof(int));
+
+  initVBOs(mesh);
   return mesh;
 }
 
@@ -156,12 +158,11 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
     unbindVBOs();
   }
   else if (flags->rm == VBO) {
-      initVBOs(mesh);
-      bindVBOs(mesh);
+    bindVBOs(mesh);
 
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
-      // glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
+    // glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
       //                BUFFER_OFFSET(mesh->numIndices * sizeof(unsigned int)));
   }
 
