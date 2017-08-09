@@ -142,9 +142,17 @@ void keyDown(SDL_KeyboardEvent *e)
 
     case SDLK_m:
       globals.drawingFlags.rm++;
+      printf("RM:");
       if (globals.drawingFlags.rm >= nrms)
+      {
+        printf(" intermediate mode\n");
         globals.drawingFlags.rm = im;
-      printf("Changing RM\n");
+      }
+      if (globals.drawingFlags.rm == VA)
+        printf(" vertex arrays\n");
+      if (globals.drawingFlags.rm == VBO)
+        printf(" vertex buffer objects\n");
+
       break;
 
     case SDLK_p:
@@ -448,6 +456,7 @@ main(int argc, char **argv)
   glutInitWindowSize(800, 600);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   glutCreateWindow("GLUT OSD");
+  glewInit();
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
     fprintf(stderr, "%s:%d: unable to init SDL: %s\n",
