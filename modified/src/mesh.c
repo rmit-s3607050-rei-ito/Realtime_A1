@@ -93,7 +93,7 @@ createMesh(size_t numVerts, size_t numIndices)
   mesh->verts = (Vertex*) calloc(numVerts, sizeof(Vertex));
   mesh->indices = (unsigned int*) calloc(numIndices, sizeof(int));
 
-  initVBOs(mesh);
+  //initVBOs(mesh);
   return mesh;
 }
 
