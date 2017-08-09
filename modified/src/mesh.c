@@ -93,7 +93,7 @@ createMesh(size_t numVerts, size_t numIndices)
   mesh->verts = (Vertex*) calloc(numVerts, sizeof(Vertex));
   mesh->indices = (unsigned int*) calloc(numIndices, sizeof(int));
 
-  //initVBOs(mesh);
+  initVBOs(mesh);
   return mesh;
 }
 
@@ -162,8 +162,8 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
-    // glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
-      //                BUFFER_OFFSET(mesh->numIndices * sizeof(unsigned int)));
+    glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
+                   BUFFER_OFFSET(mesh->numIndices * sizeof(unsigned int)));
   }
 
   glPopAttrib();
@@ -279,7 +279,6 @@ createPlane(float width, float height, size_t rows, size_t cols)
 {
   return createPlaneRowMajor(width, height, rows, cols);
 }
-
 
 /*
  * Create a sphere with the specified number of stacks and slices
@@ -406,7 +405,6 @@ createCylinder(size_t stacks, size_t slices, float radius)
     mesh->indices[index++] = i + 1;
     mesh->indices[index++] = endcapVerts + slices + 1;
   }
-
 
   return mesh;
 }
