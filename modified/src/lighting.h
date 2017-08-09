@@ -1,10 +1,11 @@
 #include "util.h"
+#include "gl.h"
 
 #define MAX_LIGHTS 8
 
 typedef struct
 {
-  static float pos[];
+  float x, y, z, a;
 } LightPos;
 
 void initLightPos();
