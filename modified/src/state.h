@@ -7,6 +7,8 @@
 #include "camera.h"
 #include "counters.h"
 
+#define MAX_LIGHTS 8
+
 /*
  * All of the global state for our main functions is declared here
  */
@@ -21,4 +23,13 @@ typedef struct {
   int wantRedisplay;
   SDL_Window *window;
   bool debug;
+  bool bench;
+  bool OSD;
+  int timePast;
+  int nLights;
 } Globals;
+
+typedef struct
+{
+  float x, y, z, a;
+} LightPos;

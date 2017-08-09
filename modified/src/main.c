@@ -9,6 +9,32 @@
 
 Globals globals;
 
+//static float lightPos1[];
+//
+//void initLightPos()
+//{
+//  lightPos1[] = { 1, 1, 1, 0};
+//  //lightPos[1] = { -1, 1, 1, 0 };
+//  //lightPos[2] = { -1, -1, 1, 0 };
+//  //lightPos[3] = { 1, -1, 1, 0 };
+//  //lightPos[4] = { -1, -1, -1, 0 };
+//  //lightPos[5] = { -1, 1, -1, 0 };
+//  //lightPos[6] = { 1, 1, -1, 0 };
+//  //lightPos[7] = { 1, -1, -1 ,0 };
+//}
+//
+//void renderLights()
+//{
+//  for (int i = 0; i < globals.nLights; i++)
+//    glLightfv(GL_LIGHT0+i, GL_POSITION, lightPos1);
+//}
+//
+//void enableLights()
+//{
+//  for (int i = 0; i < globals.nLights; i++)
+//    glEnable(GL_LIGHT0+i);
+//}
+
 static void cleanup() {
   destroyPlayer(&globals.player);
   destroyLevel(&globals.level);
@@ -181,6 +207,21 @@ void keyDown(SDL_KeyboardEvent *e)
       printf("Tesselation: %zu %zu\n",
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
+
+    case SDLK_u:
+      globals.OSD = !globals.OSD;
+      break;
+
+    case SDLK_GREATER:
+      if (globals.nLights < MAX_LIGHTS)
+        globals.nLights++;
+      break;
+
+    case SDLK_LESS:
+      if (globals.nLights > 0)
+        globals.nLights--;
+      break;
+
     default:
       updateKey(e, true);
       break;
@@ -266,10 +307,13 @@ render()
   static float lightPos[] = { 1, 1, 1, 0 };
   glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
+  //renderLights();
+
   renderPlayer(&globals.player, &globals.drawingFlags);
   renderLevel(&globals.level, &globals.drawingFlags);
 
-  displayOSD(&globals.counters, &globals.drawingFlags);
+  if (globals.OSD)
+    displayOSD(&globals.counters, &globals.drawingFlags);
 
   SDL_GL_SwapWindow(globals.window);
 
@@ -285,6 +329,7 @@ update()
     tLast = SDL_GetTicks();
 
   int t = SDL_GetTicks();
+  int timer = SDL_GetTicks() - globals.timePast;
   int dtMs = t - tLast;
   float dt = (float)dtMs / 1000.0f;
   tLast = t;
@@ -295,15 +340,18 @@ update()
     updateCounters(&globals.counters, t);
     globals.camera.pos = globals.player.pos;
 
-    //if(bench)
-    //{
-    //  float fr = 1.0 / globals.counters.frameTime*1000.0f;
-    //  float ft = ctrs->frameTime;
-    //  float ts = (triangle counter);
-    //  saveBench(fr, ft, ts);
-    //}
-
-    //printf("%f\n", 1.0 / globals.counters.frameTime*1000.0f);
+    if(globals.bench)
+    {
+      float fr = 1.0/globals.counters.frameTime*1000.0f;
+      float ft = globals.counters.frameTime;
+      if (!isinf(fr) && timer>1000)
+      {
+        saveBench(fr, ft, 0);
+        if (globals.debug)
+          printf("saved\n");
+        globals.timePast += 1000;
+      }
+    }
 
     postRedisplay();
   };
@@ -314,7 +362,12 @@ init()
 {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
+
   glEnable(GL_LIGHT0);
+
+  //initLightPos();
+  //enableLights();
+
   glEnable(GL_NORMALIZE);
 
   glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -327,23 +380,52 @@ init()
   globals.drawingFlags.textures = true;
   globals.drawingFlags.lighting = true;
   globals.drawingFlags.rm = im;
+
   initPlayer(&globals.player, &globals.drawingFlags);
   initLevel(&globals.level, &globals.drawingFlags);
   initCamera(&globals.camera);
   initCounters(&globals.counters);
+
   globals.camera.pos = globals.player.pos;
   globals.camera.width = 800;
   globals.camera.height = 600;
 
   globals.wantRedisplay = 1;
   globals.debug = true;
+
+  globals.bench = true;
+
+  globals.OSD = true;
+
+  globals.timePast = 0;
+
+  globals.nLights = 1;
+
+  if (globals.bench)
+  {
+    initBench
+    (
+      globals.drawingFlags.tess[0],
+      true, //im
+      globals.drawingFlags.wireframe, //rm
+      globals.drawingFlags.lighting,
+      globals.nLights,
+      globals.drawingFlags.normals
+    );
+  }
 }
 
 void mainLoop()
 {
-  while (1) {
+  while (1)
+  {
+    //if (globals.bench)
+    //  startBench(&globals.player);
+
     eventDispatcher();
-    if (globals.wantRedisplay) {
+
+    if (globals.wantRedisplay)
+    {
       render();
       globals.wantRedisplay = 0;
     }
@@ -375,6 +457,8 @@ int initGraphics()
       __FILE__, __LINE__, SDL_GetError());
     exit(EXIT_FAILURE);
   }
+
+  return 1;
 }
 
 void sys_shutdown()
@@ -390,7 +474,7 @@ main(int argc, char **argv)
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   glutCreateWindow("GLUT OSD");
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
     fprintf(stderr, "%s:%d: unable to init SDL: %s\n",
       __FILE__, __LINE__, SDL_GetError());
     exit(EXIT_FAILURE);
