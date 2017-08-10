@@ -1,4 +1,5 @@
 #include "util.h"
+#include "gl.h"
 #include "controls.h"
 #include "player.h"
 
@@ -17,7 +18,5 @@ typedef struct
 
 void initBench(int tess, bool iMode, bool rMode, bool light, int nLights,
   bool normals);
-// void startBench(Controls *controls);
-void startBench(Player *controls);
 void saveBench(float fr, float ft, float tps);
 char *fileName(BenchParams bench);

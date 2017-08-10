@@ -16,13 +16,6 @@ void initBench(int tess, bool iMode, bool rMode, bool light, int nLights,
   bench.file = fopen(file, "w");
 }
 
-void startBench(Player *controls)
-{
-  controls->jump = true;
-  controls->jump = false;
-  printf("jumped\n");
-}
-
 void saveBench(float fr, float ft, float tps)
 {
   if (bench.file == NULL)
