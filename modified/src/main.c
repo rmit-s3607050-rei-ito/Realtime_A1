@@ -329,8 +329,6 @@ update()
       if (!isinf(fr) && timer>1000)
       {
         saveBench(fr, ft, 0);
-        if (globals.debug)
-          printf("saved\n");
         globals.timePast += 1000;
       }
     }
@@ -397,9 +395,6 @@ void mainLoop()
 {
   while (1)
   {
-    //if (globals.bench)
-    //  startBench(&globals.player);
-
     eventDispatcher();
 
     if (globals.wantRedisplay)
