@@ -382,7 +382,7 @@ init()
     initBench
     (
       globals.drawingFlags.tess[0],
-      true, //im
+      globals.drawingFlags.rm, //im
       globals.drawingFlags.wireframe, //rm
       globals.drawingFlags.lighting,
       globals.nLights,
