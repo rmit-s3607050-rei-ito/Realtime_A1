@@ -195,14 +195,16 @@ void keyDown(SDL_KeyboardEvent *e)
       globals.OSD = !globals.OSD;
       break;
 
-    case SDLK_GREATER:
+    case SDLK_PERIOD:
       if (globals.nLights < MAX_LIGHTS)
         globals.nLights++;
+      enableLights(globals.nLights);
       break;
 
-    case SDLK_LESS:
-      if (globals.nLights > 0)
+    case SDLK_COMMA:
+      if (globals.nLights > 1)
         globals.nLights--;
+      disableLights(globals.nLights);
       break;
 
     default:
@@ -287,10 +289,7 @@ render()
 
   applyViewMatrix(&globals.camera);
 
-  static float lightPos[] = { 1, 1, 1, 0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
-  //renderLights(globals.nLights);
+  renderLights(globals.nLights);
 
   renderPlayer(&globals.player, &globals.drawingFlags);
   renderLevel(&globals.level, &globals.drawingFlags);
@@ -346,9 +345,8 @@ init()
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
 
-  glEnable(GL_LIGHT0);
-
-  //enableLights(globals.nLights);
+  globals.nLights = 1;
+  enableLights(globals.nLights);
 
   glEnable(GL_NORMALIZE);
 
@@ -367,7 +365,6 @@ init()
   initLevel(&globals.level, &globals.drawingFlags);
   initCamera(&globals.camera);
   initCounters(&globals.counters);
-  //initLightPos();
 
   globals.camera.pos = globals.player.pos;
   globals.camera.width = 800;
@@ -381,8 +378,6 @@ init()
   globals.OSD = true;
 
   globals.timePast = 0;
-
-  globals.nLights = 1;
 
   if (globals.bench)
   {
