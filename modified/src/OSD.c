@@ -49,12 +49,38 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
   for (bufp = buffer; *bufp; bufp++)
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
 
+  /* Triangles per second */
+  glColor3f(1.0, 1.0, 0.0);
+  glRasterPos2i(w-rm, h-3*vs);
+  snprintf(buffer, sizeof buffer, "ts (t/s): TODO");
+  for (bufp = buffer; *bufp; bufp++)
+    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
 
   /* Tesselation */
   glColor3f(1.0, 1.0, 0.0);
-  glRasterPos2i(w-rm, h-3*vs);
-  snprintf(buffer, sizeof buffer, "tess:  %4ld %4ld",
+  glRasterPos2i(w-rm, h-4*vs);
+  snprintf(buffer, sizeof buffer, "Tess:  %4ld %4ld",
 	   dfs->tess[0], dfs->tess[1]);
+  for (bufp = buffer; *bufp; bufp++)
+    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
+
+  /* Rendering Mode */
+  glColor3f(1.0, 1.0, 0.0);
+  glRasterPos2i(w-rm, h-5*vs);
+  switch(dfs->rm)
+  {
+    case im:
+      snprintf(buffer, sizeof buffer, "RM: iM");
+      break;
+    case VA:
+      snprintf(buffer, sizeof buffer, "RM: VA");
+      break;
+    case VBO:
+      snprintf(buffer, sizeof buffer, "RM: VBO");
+      break;
+    default:
+      break;
+  }
   for (bufp = buffer; *bufp; bufp++)
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
 
