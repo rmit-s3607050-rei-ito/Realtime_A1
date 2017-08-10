@@ -198,13 +198,13 @@ void keyDown(SDL_KeyboardEvent *e)
     case SDLK_PERIOD:
       if (globals.nLights < MAX_LIGHTS)
         globals.nLights++;
-      //printf("%d\n", globals.nLights);
+      enableLights(globals.nLights);
       break;
 
     case SDLK_COMMA:
       if (globals.nLights > 1)
         globals.nLights--;
-      //printf("%d\n", globals.nLights);
+      disableLights(globals.nLights);
       break;
 
     default:
@@ -289,9 +289,6 @@ render()
 
   applyViewMatrix(&globals.camera);
 
-  //static float lightPos[] = { 1, 1, 1, 0 };
-  //glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
   renderLights(globals.nLights);
 
   renderPlayer(&globals.player, &globals.drawingFlags);
@@ -348,6 +345,7 @@ init()
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
 
+  globals.nLights = 1;
   enableLights(globals.nLights);
 
   glEnable(GL_NORMALIZE);
@@ -380,8 +378,6 @@ init()
   globals.OSD = true;
 
   globals.timePast = 0;
-
-  globals.nLights = 1;
 
   if (globals.bench)
   {

@@ -11,3 +11,4 @@ typedef struct
 void initLightPos();
 void renderLights(int nLights);
 void enableLights(int nLights);
+void disableLights(int nLights);
