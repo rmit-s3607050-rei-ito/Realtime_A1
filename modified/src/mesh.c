@@ -60,6 +60,11 @@ void bindVBOs(Mesh *mesh)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numIndices * sizeof(unsigned int),
                mesh->indices, GL_STATIC_DRAW);
+
+  // [3]. Normals
+  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
+  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numIndices * sizeof(unsigned int),
+              //  mesh->indices, GL_STATIC_DRAW);
 }
 
 void unbindVBOs()
@@ -161,7 +166,14 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
     bindVBOs(mesh);
 
     glEnableClientState(GL_VERTEX_ARRAY);
+
+    //glEnableClientState(GL_NORMAL_ARRAY);
+    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
     glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
+    glNormalPointer(GL_FLOAT, sizeof(Vec3f), BUFFER_OFFSET(0));
+    glTexCoordPointer(2, GL_FLOAT, sizeof(Vec2f), BUFFER_OFFSET(0));
+
     glDrawElements(GL_TRIANGLES, mesh->numIndices, GL_UNSIGNED_INT,
                    BUFFER_OFFSET(mesh->numIndices * sizeof(unsigned int)));
   }
