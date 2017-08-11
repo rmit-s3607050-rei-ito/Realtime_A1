@@ -333,9 +333,10 @@ update()
     {
       float fr = 1.0/globals.counters.frameTime*1000.0f;
       float ft = globals.counters.frameTime;
+      float ts = globals.counters.triangleTime;
       if (!isinf(fr) && timer>1000)
       {
-        saveBench(fr, ft, 0);
+        saveBench(fr, ft, ts);
         globals.timePast += 1000;
       }
     }
