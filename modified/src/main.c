@@ -377,10 +377,10 @@ init()
   globals.drawingFlags.lighting = true;
   globals.drawingFlags.rm = im;
 
+  initCounters(&globals.counters);
   initPlayer(&globals.player, &globals.drawingFlags, &globals.counters);
   initLevel(&globals.level, &globals.drawingFlags, &globals.counters);
   initCamera(&globals.camera);
-  initCounters(&globals.counters);
 
   globals.camera.pos = globals.player.pos;
   globals.camera.width = 800;

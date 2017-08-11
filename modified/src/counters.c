@@ -8,7 +8,7 @@ initCounters(Counters *ctrs)
   ctrs->lastTime = 0.0;
   ctrs->interval = 1000.0; // 1 s
   // Initial triangle count calculated based on default 8 tesselation
-  ctrs->triangles = 392;
+  ctrs->triangles = 0;
 }
 
 void
