@@ -198,11 +198,14 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
  * but I don't think that's really necessary here
  */
 Mesh*
-createCube()
+createCube(Counters *ctrs)
 {
   Mesh* mesh = createMesh(24, 36);
   memcpy(mesh->verts, cubeVerts, 24 * sizeof(Vertex));
   memcpy(mesh->indices, cubeIndices, 36 * sizeof(unsigned int));
+  // /* 12 used for cube since it is unaffected by tesselating,
+  //  * there is always 6 faces, 12 triangles [2 per face]) */
+  updateTriangleCount(12, ctrs);
   return mesh;
 }
 
@@ -284,8 +287,9 @@ createPlaneRowMajor(float width, float height, size_t rows, size_t cols)
 }
 
 Mesh*
-createPlane(float width, float height, size_t rows, size_t cols)
+createPlane(float width, float height, size_t rows, size_t cols, Counters *ctrs)
 {
+  updateTriangleCount(2 * (rows * cols), ctrs);
   return createPlaneRowMajor(width, height, rows, cols);
 }
 
@@ -293,9 +297,14 @@ createPlane(float width, float height, size_t rows, size_t cols)
  * Create a sphere with the specified number of stacks and slices
  */
 Mesh*
-createSphere(size_t stacks, size_t slices)
+createSphere(size_t stacks, size_t slices, Counters *ctrs)
 {
   Mesh* mesh = createMesh((stacks + 1) * (slices + 1), stacks * slices * 6);
+  /* Wasn't too sure of how to get the correct number of triangles
+   * (given formula is probably not right)
+   */
+  updateTriangleCount(2 * (stacks * slices), ctrs);
+  printf("Sphere created\n");
 
   // Vertices
   float u, du = 2.0 * M_PI / (float)slices;
@@ -337,10 +346,18 @@ createSphere(size_t stacks, size_t slices)
  * and endcaps facing down the z axis
  */
 Mesh*
-createCylinder(size_t stacks, size_t slices, float radius)
+createCylinder(size_t stacks, size_t slices, float radius, Counters *ctrs)
 {
   Mesh* mesh = createMesh((stacks + 1) * (slices + 1) + (slices + 1) * 2,
 			  stacks * slices * 6 + slices * 3 * 2);
+
+ /* [2]. Cylinders comprised on encaps and sides:
+  * Encaps = tesselation / 2 per face = 2 faces = tesselation (slice/stacks)
+  * Sides = 2 * stacks * slices
+  * # Since both stack/slices values are equal, we just use slices in this case
+  */
+  updateTriangleCount(slices, ctrs);
+  updateTriangleCount(2 * (stacks * slices), ctrs);
 
   // Sides vertices
   float u, du = 2.0 * M_PI / slices;

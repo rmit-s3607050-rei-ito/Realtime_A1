@@ -15,7 +15,6 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
   int w, h;
   const int rm = 150, vs = 20;
 
-
   glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_DEPTH_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
@@ -52,7 +51,7 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
   /* Triangles per second */
   glColor3f(1.0, 1.0, 0.0);
   glRasterPos2i(w-rm, h-3*vs);
-  snprintf(buffer, sizeof buffer, "ts (t/s): TODO");
+  snprintf(buffer, sizeof buffer, "ts (t/s):  %5.0f", 1.0 / ctrs->triangleTime * milli);
   for (bufp = buffer; *bufp; bufp++)
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
 

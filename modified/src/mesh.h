@@ -1,5 +1,6 @@
 #pragma once
 
+#include "counters.h"
 #include "util.h"
 
 /*
@@ -42,10 +43,10 @@ Mesh* createMesh(size_t numVerts, size_t numIndices);
 void destroyMesh(Mesh* mesh);
 void renderMesh(Mesh* mesh, DrawingFlags* flags);
 
-Mesh* createCube();
-Mesh* createPlane(float width, float height, size_t rows, size_t cols);
-Mesh* createSphere(size_t segments, size_t slices);
-Mesh* createCylinder(size_t segments, size_t slices, float radius);
+Mesh* createCube(Counters *ctrs);
+Mesh* createPlane(float width, float height, size_t rows, size_t cols, Counters *ctrs);
+Mesh* createSphere(size_t segments, size_t slices, Counters *ctrs);
+Mesh* createCylinder(size_t segments, size_t slices, float radius, Counters *ctrs);
 
 void drawLine(Vec3f color, Vec3f a, Vec3f b);
 void drawParabola(Vec3f color, Vec3f vel, float g, DrawingFlags* flags);

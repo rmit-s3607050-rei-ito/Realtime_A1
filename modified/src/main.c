@@ -170,23 +170,25 @@ void keyDown(SDL_KeyboardEvent *e)
       break;
 
     case SDLK_EQUALS:
+      resetTriangleCount(&globals.counters);
       globals.drawingFlags.tess[0] =
         clamp(globals.drawingFlags.tess[0] * 2, 8, 1024);
       globals.drawingFlags.tess[1] =
         clamp(globals.drawingFlags.tess[1] * 2, 8, 1024);
-      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess);
-      generateLevelGeometry(&globals.level, globals.drawingFlags.tess);
+      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess, &globals.counters);
+      generateLevelGeometry(&globals.level, globals.drawingFlags.tess, &globals.counters);
       printf("Tesselation: %zu %zu\n",
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
 
     case SDLK_MINUS:
+      resetTriangleCount(&globals.counters);
       globals.drawingFlags.tess[0] =
         clamp(globals.drawingFlags.tess[0] / 2, 8, 1024);
       globals.drawingFlags.tess[1] =
         clamp(globals.drawingFlags.tess[1] / 2, 8, 1024);
-      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess);
-      generateLevelGeometry(&globals.level, globals.drawingFlags.tess);
+      generatePlayerGeometry(&globals.player, globals.drawingFlags.tess, &globals.counters);
+      generateLevelGeometry(&globals.level, globals.drawingFlags.tess, &globals.counters);
       printf("Tesselation: %zu %zu\n",
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
@@ -359,8 +361,8 @@ init()
   globals.drawingFlags.lighting = true;
   globals.drawingFlags.rm = im;
 
-  initPlayer(&globals.player, &globals.drawingFlags);
-  initLevel(&globals.level, &globals.drawingFlags);
+  initPlayer(&globals.player, &globals.drawingFlags, &globals.counters);
+  initLevel(&globals.level, &globals.drawingFlags, &globals.counters);
   initCamera(&globals.camera);
   initCounters(&globals.counters);
 

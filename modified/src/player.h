@@ -17,8 +17,8 @@ typedef struct {
   Material material;
 } Player;
 
-void initPlayer(Player* player, DrawingFlags* flags);
+void initPlayer(Player* player, DrawingFlags* flags, Counters *ctrs);
 void destroyPlayer(Player* player);
-void generatePlayerGeometry(Player* player, size_t segments[]);
+void generatePlayerGeometry(Player* player, size_t segments[], Counters *ctrs);
 void updatePlayer(Player* player, float dt, Controls* controls);
 void renderPlayer(Player* player, DrawingFlags* flags);
