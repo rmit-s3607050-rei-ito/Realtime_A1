@@ -15,6 +15,5 @@ typedef struct {
 
 void updateCounters(Counters *ctrs, float t);
 void initCounters(Counters *ctrs);
-
 void resetTriangleCount();
 void updateTriangleCount(int numTriangles, Counters *ctrs);

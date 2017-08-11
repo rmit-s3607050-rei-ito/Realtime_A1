@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util.h"
+#include "counters.h"
 #include "controls.h"
 #include "mesh.h"
 #include "material.h"

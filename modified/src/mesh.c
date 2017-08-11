@@ -302,7 +302,6 @@ createSphere(size_t stacks, size_t slices, Counters *ctrs)
    * (given formula is probably not right)
    */
   updateTriangleCount(2 * (stacks * slices), ctrs);
-  printf("Sphere created\n");
 
   // Vertices
   float u, du = 2.0 * M_PI / (float)slices;
