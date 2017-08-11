@@ -1,5 +1,6 @@
 #pragma once
 
+#include "counters.h"
 #include "util.h"
 #include "mesh.h"
 #include "material.h"
@@ -51,8 +52,8 @@ typedef struct {
   River river;
 } Level;
 
-void generateLevelGeometry(Level* level, size_t segments[]); 
-void initLevel(Level* level, DrawingFlags* flags);
+void generateLevelGeometry(Level* level, size_t segments[], Counters *ctrs);
+void initLevel(Level* level, DrawingFlags* flags, Counters *ctrs);
 void destroyLevel(Level* level);
 void updateLevel(Level* level, float dt);
 void renderLevel(Level* level, DrawingFlags* flags);

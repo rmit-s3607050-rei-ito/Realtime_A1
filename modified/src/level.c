@@ -6,14 +6,14 @@
  */
 static void
 initRoad(Road* road, float laneWidth, float laneHeight,
-	 size_t numLanes, Vec3f pos)
+	 size_t numLanes, Vec3f pos, Counters *ctrs)
 {
   road->laneWidth = laneWidth;
   road->laneHeight = laneHeight;
   road->pos = pos;
   road->numLanes = numLanes;
 
-  road->enemyMesh = createCube();
+  road->enemyMesh = createCube(ctrs);
   road->enemyMaterial =
     (Material) { { 0.2, 0.2, 0.2, 0 }, { 1, 0, 0, 0 }, { 1, 1, 1, 0 }, 50 };
 
@@ -32,7 +32,7 @@ initRoad(Road* road, float laneWidth, float laneHeight,
       enemy->vel.x = 0.5;
     else
       enemy->vel.x = -0.5;
-		
+
     enemy->size = (Vec3f) { 0.15, 0.1, 0.1 };
     ++enemy;
   }
@@ -43,14 +43,14 @@ initRoad(Road* road, float laneWidth, float laneHeight,
  */
 static void
 initRiver(River* river, float laneWidth, float laneHeight, size_t numLanes,
-	  Vec3f pos, DrawingFlags* flags)
+	  Vec3f pos, DrawingFlags* flags, Counters *ctrs)
 {
   river->laneWidth = laneWidth;
   river->laneHeight = laneHeight;
   river->pos = pos;
   river->numLanes = numLanes;
 
-  river->logMesh = createCylinder(flags->tess[0], flags->tess[1], 1);
+  river->logMesh = createCylinder(flags->tess[0], flags->tess[1], 1, ctrs);
   river->logMaterial = (Material) { { 0.2, 0.2, 0.2, 0 }, { 1, 1, 1, 0 }, { 1, 1, 1, 0 }, 40 };
   river->logTexture = loadTexture("res/wood.jpg");
 
@@ -69,7 +69,7 @@ initRiver(River* river, float laneWidth, float laneHeight, size_t numLanes,
       log->vel.x = 0.5;
     else
       log->vel.x = -0.5;
-		
+
     // we specified our cylinders looking down the z axis so we need to make sure they are rotated the right way when we draw them
     log->rot.y = 90.0;
     log->size = (Vec3f) { 0.1, 0.1, 0.5 };
@@ -200,7 +200,7 @@ destroyRiver(River* river)
  */
 
 void
-generateLevelGeometry(Level* level, size_t segments[])
+generateLevelGeometry(Level* level, size_t segments[], Counters *ctrs)
 {
   if (level->terrainMesh)
     destroyMesh(level->terrainMesh);
@@ -208,27 +208,27 @@ generateLevelGeometry(Level* level, size_t segments[])
     destroyMesh(level->river.logMesh);
 
   level->terrainMesh =
-    createPlane(level->width, level->height, segments[0], segments[1]);
-  level->river.logMesh = createCylinder(segments[0], segments[1], 1);
+    createPlane(level->width, level->height, segments[0], segments[1], ctrs);
+  level->river.logMesh = createCylinder(segments[0], segments[1], 1, ctrs);
 }
 
 /*
  * Initialize all of the stuff we need for the game world
  */
 void
-initLevel(Level* level, DrawingFlags* flags)
+initLevel(Level* level, DrawingFlags* flags, Counters *ctrs)
 {
   level->width = 10;
   level->height = 10;
 
   level->terrainMesh =
-    createPlane(level->width, level->height, flags->tess[0], flags->tess[1]);
+    createPlane(level->width, level->height, flags->tess[0], flags->tess[1], ctrs);
 
   level->terrainMaterial =
     (Material) { { 0.2, 0.2, 0.2, 0 }, { 0, 1, 0, 0 }, { 0.3, 0.3, 0.3, 0 }, 20 };
 
-  initRoad(&level->road, level->width, 1.75, 8, (Vec3f) { 0, 0, 1 });
-  initRiver(&level->river, level->width, 1.75, 8, (Vec3f) { 0, 0, -3 }, flags);
+  initRoad(&level->road, level->width, 1.75, 8, (Vec3f) { 0, 0, 1 }, ctrs);
+  initRiver(&level->river, level->width, 1.75, 8, (Vec3f) { 0, 0, -3 }, flags, ctrs);
 }
 
 /*

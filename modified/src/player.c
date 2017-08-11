@@ -30,7 +30,7 @@ integratePlayer(Player* player, float dt)
  * Initialise the player
  */
 void
-initPlayer(Player* player, DrawingFlags* flags)
+initPlayer(Player* player, DrawingFlags* flags, Counters *ctrs)
 {
   player->pos = (Vec3f) { 0, 0, 4 };
   player->initPos = player->pos;
@@ -42,7 +42,7 @@ initPlayer(Player* player, DrawingFlags* flags)
   player->g = 9.8;
   player->jump = false;
 
-  generatePlayerGeometry(player, flags->tess);
+  generatePlayerGeometry(player, flags->tess, ctrs);
   player->material = (Material) { { 0.2, 0.2, 0.2, 0 }, { 0.1, 0.5, 0.9, 0 }, { 1, 1, 1, 0 }, 50 };
 }
 
@@ -60,11 +60,11 @@ destroyPlayer(Player* player)
  * This should be called whenever the tesselation is increased or decreased
  */
 void
-generatePlayerGeometry(Player* player, size_t segments[])
+generatePlayerGeometry(Player* player, size_t segments[], Counters *ctrs)
 {
   if (player->mesh)
     destroyMesh(player->mesh);
-  player->mesh = createSphere(segments[0], segments[1]);
+  player->mesh = createSphere(segments[0], segments[1], ctrs);
 }
 
 /*
