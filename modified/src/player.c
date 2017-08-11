@@ -134,11 +134,9 @@ renderPlayer(Player* player, DrawingFlags* flags)
   glColor3f(0.1, 0.5, 0.9);
   renderMesh(player->mesh, flags);
   glPopMatrix();
-	
+
   // draw the visualization of the player's velocity at our current position
-  glBegin(GL_LINES);
-  drawLine(PURPLE, (Vec3f) { 0, 0, 0 }, mulVec3f(player->vel, 0.1)); 
-  glEnd();
+  drawLine(PURPLE, (Vec3f) { 0, 0, 0 }, mulVec3f(player->vel, 0.1));
   glPopMatrix();
 
   glPopAttrib();

@@ -182,13 +182,11 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
   }
 
   if (flags->normals) {
-    glBegin(GL_LINES);
     for (size_t i = 0; i < mesh->numVerts; ++i) {
       Vertex v = mesh->verts[i];
       Vec3f n = addVec3f(mulVec3f(v.normal, 0.1), v.pos);
       drawLine(YELLOW, v.pos, n);
     }
-    glEnd();
   }
 }
 
@@ -426,9 +424,13 @@ void
 drawLine(Vec3f color, Vec3f a, Vec3f b)
 {
   glPushAttrib(GL_CURRENT_BIT);
+  glBegin(GL_LINES);
+
   submitColor(color);
   submitVertex(a);
   submitVertex(b);
+
+  glEnd();
   glPopAttrib();
 }
 
@@ -440,8 +442,6 @@ drawParabola(Vec3f color, Vec3f vel, float g, DrawingFlags* flags)
 {
   float tof = (2.0 * vel.y) / g; // time of flight
   float step = tof / (float) flags->tess[0];
-
-  glBegin(GL_LINES);
 
   // this loop doesn't draw the last tangent, but usually it won't be
   // visible through the floor so it's not a huge deal
@@ -461,6 +461,4 @@ drawParabola(Vec3f color, Vec3f vel, float g, DrawingFlags* flags)
       drawLine(CYAN, a, t);
     }
   }
-
-  glEnd();
 }
