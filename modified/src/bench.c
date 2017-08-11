@@ -2,7 +2,7 @@
 
 BenchParams bench;
 
-void initBench(int tess, bool iMode, bool rMode, bool light, int nLights,
+void initBench(int tess, renderMode iMode, bool rMode, bool light, int nLights,
   bool normals)
 {
   bench.tessellation = tess;
@@ -31,18 +31,20 @@ char *fileName(BenchParams bench)
   static char name[STR_LEN] = "T:";
   char str[STR_LEN];
 
-  sprintf(str, "%d|IM:", bench.tessellation);
+  sprintf(str, "%d|RM:", bench.tessellation);
   strcat(name, str);
 
-  if (bench.iMode)
-    strcat(name, "va|RM:");
+  if (bench.iMode == VA)
+    strcat(name, "va|WF:");
+  else if (bench.iMode == VBO)
+    strcat(name, "vbo|WF:");
   else
-    strcat(name, "vbo|RM:");
+    strcat(name, "im|WF:");
 
   if (bench.rMode)
-    strcat(name, "wired|L:");
+    strcat(name, "on|L:");
   else
-    strcat(name, "filled|L:");
+    strcat(name, "off|L:");
 
   if (bench.lighting)
   {

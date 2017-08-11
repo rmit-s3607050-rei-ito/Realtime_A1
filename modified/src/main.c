@@ -287,6 +287,8 @@ void eventDispatcher()
 static void
 render()
 {
+  GLenum err;
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   applyViewMatrix(&globals.camera);
@@ -302,6 +304,9 @@ render()
   SDL_GL_SwapWindow(globals.window);
 
   globals.counters.frameCount++;
+
+  if ((err = glGetError()) != GL_NO_ERROR)
+    printf("display: %s\n", gluErrorString(err));
 }
 
 static void
@@ -384,7 +389,7 @@ init()
     initBench
     (
       globals.drawingFlags.tess[0],
-      true, //im
+      globals.drawingFlags.rm, //im
       globals.drawingFlags.wireframe, //rm
       globals.drawingFlags.lighting,
       globals.nLights,

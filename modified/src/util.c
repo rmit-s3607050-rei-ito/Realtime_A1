@@ -53,7 +53,6 @@ drawAxes()
   glVertex3f(0, 0, 1);
 
   glEnd();
-
   glPopAttrib();
 }
 
@@ -64,9 +63,9 @@ loadTexture(const char* filename)
   glPushAttrib(GL_TEXTURE_BIT);
   unsigned int id =
     SOIL_load_OGL_texture(filename,
-			  SOIL_LOAD_AUTO,
-			  SOIL_CREATE_NEW_ID,
-			  SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
+      SOIL_LOAD_AUTO,
+      SOIL_CREATE_NEW_ID,
+      SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y);
   glPopAttrib();
   return id;
 }
