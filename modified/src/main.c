@@ -303,8 +303,11 @@ render()
 
   globals.counters.frameCount++;
 
-  if ((err = glGetError()) != GL_NO_ERROR)
-    printf("display: %s\n", gluErrorString(err));
+  if (globals.debug)
+  {
+    if ((err = glGetError()) != GL_NO_ERROR)
+      printf("display: %s\n", gluErrorString(err));
+  }
 }
 
 static void
@@ -335,6 +338,13 @@ update()
       {
         saveBench(fr, ft, 0);
         globals.timePast += 1000;
+        if (globals.timePast >= 25000)
+        {
+          if (globals.debug)
+            printf("Quit\n");
+          cleanup();
+          quit(0);
+        }
       }
     }
 
