@@ -37,7 +37,6 @@ typedef struct {
 #define BUFFER_OFFSET(i) ((void*)(i))
 void initVBOs();
 void bindVBOs();
-void unbindVBOs();
 
 Mesh* createMesh(size_t numVerts, size_t numIndices);
 void destroyMesh(Mesh* mesh);

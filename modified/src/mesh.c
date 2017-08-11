@@ -45,11 +45,13 @@ static unsigned int cubeIndices[] = {
  */
 void
 initVBOs(Mesh *mesh) {
+  // Generate buffers for indices and vertices
   glGenBuffers(1, &mesh->vbo);
   glGenBuffers(1, &mesh->ibo);
 }
 
-void bindVBOs(Mesh *mesh)
+void
+bindVBOs(Mesh *mesh)
 {
   // Bind buffers, then add data into buffer for both verticies and indices
   // [1]. Verticies
@@ -60,24 +62,7 @@ void bindVBOs(Mesh *mesh)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->numIndices * sizeof(unsigned int),
                mesh->indices, GL_STATIC_DRAW);
-}
-
-void unbindVBOs()
-{
-   /* Unbind buffers of VBOs when switching rendering mode (empty them), binding
-    * done when rendering mode switched to VBO
-    */
-   int buffer;
-
-   // [1]. Array Buffers (Verticies)
-   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &buffer);
-   if (buffer != 0)
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-   // [2]. Element Array Buffers (Indices)
-   glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &buffer);
-   if (buffer != 0)
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  // # unbindVBOs type function not needed as Push/Pop used in renderMesh();
 }
 
 /*
@@ -162,10 +147,14 @@ renderMesh(Mesh* mesh, DrawingFlags* flags)
 
     bindVBOs(mesh);
 
+    /* Set up client states and pointers to the vertex, normal and
+     * texture coordinate arrays, using BUFFER_OFFSET params to define positions
+     * as to where to search for the refenced values
+     */
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
+    // Vertex = start at beginning, Normals = Skip over Vertex, Tex = Skip over both
     glVertexPointer(3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
     glNormalPointer(GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(sizeof(Vec3f)));
     glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(sizeof(Vec3f) + sizeof(Vec3f)));
@@ -201,8 +190,8 @@ createCube(Counters *ctrs)
   Mesh* mesh = createMesh(24, 36);
   memcpy(mesh->verts, cubeVerts, 24 * sizeof(Vertex));
   memcpy(mesh->indices, cubeIndices, 36 * sizeof(unsigned int));
-  // /* 12 used for cube since it is unaffected by tesselating,
-  //  * there is always 6 faces, 12 triangles [2 per face]) */
+  /* 12 used for cube since it is unaffected by tesselating,
+   * there are always 6 faces, 12 triangles [2 per face]) */
   updateTriangleCount(12, ctrs);
   return mesh;
 }
@@ -287,6 +276,7 @@ createPlaneRowMajor(float width, float height, size_t rows, size_t cols)
 Mesh*
 createPlane(float width, float height, size_t rows, size_t cols, Counters *ctrs)
 {
+  // Count number of cells (rows * cols), then * 2 (since 2 triangles per cell)
   updateTriangleCount(2 * (rows * cols), ctrs);
   return createPlaneRowMajor(width, height, rows, cols);
 }
@@ -299,7 +289,7 @@ createSphere(size_t stacks, size_t slices, Counters *ctrs)
 {
   Mesh* mesh = createMesh((stacks + 1) * (slices + 1), stacks * slices * 6);
   /* Wasn't too sure of how to get the correct number of triangles
-   * (given formula is probably not right)
+   * (used formula is probably not right)
    */
   updateTriangleCount(2 * (stacks * slices), ctrs);
 
@@ -348,8 +338,8 @@ createCylinder(size_t stacks, size_t slices, float radius, Counters *ctrs)
   Mesh* mesh = createMesh((stacks + 1) * (slices + 1) + (slices + 1) * 2,
 			  stacks * slices * 6 + slices * 3 * 2);
 
- /* [2]. Cylinders comprised on encaps and sides:
-  * Encaps = tesselation / 2 per face = 2 faces = tesselation (slice/stacks)
+ /* Cylinders comprised on endcaps and sides:
+  * Endcaps = tesselation / 2 per face = 2 faces = tesselation (slice/stacks)
   * Sides = 2 * stacks * slices
   * # Since both stack/slices values are equal, we just use slices in this case
   */

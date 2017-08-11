@@ -100,11 +100,12 @@ static void mouseButton(SDL_MouseButtonEvent *e, int state, int x, int y)
   }
 }
 
-// key down events
+// SDL's version keyboard events
 void keyDown(SDL_KeyboardEvent *e)
 {
   switch (e->keysym.sym)
   {
+    // Quit Application
     case SDLK_q:
       if (globals.debug)
         printf("Quit\n");
@@ -112,6 +113,7 @@ void keyDown(SDL_KeyboardEvent *e)
       quit(0);
       break;
 
+    // Halt/Pause Program
     case SDLK_h:
       globals.halt = !globals.halt;
       if (globals.halt)
@@ -120,41 +122,42 @@ void keyDown(SDL_KeyboardEvent *e)
         printf("Resuming time\n");
       break;
 
+    // Toggle Lighting
     case SDLK_l:
       globals.drawingFlags.lighting = !globals.drawingFlags.lighting;
       printf("Toggling lighting\n");
       break;
 
+    // Toggle Texturing
     case SDLK_t:
       globals.drawingFlags.textures = !globals.drawingFlags.textures;
       printf("Toggling textures\n");
       break;
 
+    // Toggle Normals
     case SDLK_n:
       globals.drawingFlags.normals = !globals.drawingFlags.normals;
       printf("Toggling normals\n");
       break;
 
+    // Toggle Axes
     case SDLK_o:
       globals.drawingFlags.axes = !globals.drawingFlags.axes;
       printf("Toggling axes\n");
       break;
 
+    // Switch between rendering mode
     case SDLK_m:
       globals.drawingFlags.rm++;
-      printf("RM:");
+      // To prevent flags from going out of bounds, when nrms reached, reset
       if (globals.drawingFlags.rm >= nrms)
       {
-        printf(" intermediate mode\n");
         globals.drawingFlags.rm = im;
       }
-      if (globals.drawingFlags.rm == VA)
-        printf(" vertex arrays\n");
-      if (globals.drawingFlags.rm == VBO)
-        printf(" vertex buffer objects\n");
 
       break;
 
+    // Switch between wireframe/filled objects
     case SDLK_p:
       globals.drawingFlags.wireframe = !globals.drawingFlags.wireframe;
       if (globals.drawingFlags.wireframe)
@@ -169,6 +172,7 @@ void keyDown(SDL_KeyboardEvent *e)
       }
       break;
 
+    // Increase Tesselation
     case SDLK_EQUALS:
       resetTriangleCount(&globals.counters);
       globals.drawingFlags.tess[0] =
@@ -181,6 +185,7 @@ void keyDown(SDL_KeyboardEvent *e)
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
 
+    // Decrease Tesselation
     case SDLK_MINUS:
       resetTriangleCount(&globals.counters);
       globals.drawingFlags.tess[0] =
@@ -193,16 +198,19 @@ void keyDown(SDL_KeyboardEvent *e)
       globals.drawingFlags.tess[0], globals.drawingFlags.tess[1]);
       break;
 
+    // Toggle OSD
     case SDLK_u:
       globals.OSD = !globals.OSD;
       break;
 
+    // Reduce number of lights
     case SDLK_PERIOD:
       if (globals.nLights < MAX_LIGHTS)
         globals.nLights++;
       enableLights(globals.nLights);
       break;
 
+    // Increase number of lights
     case SDLK_COMMA:
       if (globals.nLights > 1)
         globals.nLights--;
@@ -230,6 +238,7 @@ void eventDispatcher()
   {
     switch (e.type)
     {
+      // Mouse related events
       case SDL_MOUSEMOTION:
         mouseMotion(e.button.x, e.button.y);
         break;
@@ -239,12 +248,14 @@ void eventDispatcher()
       case SDL_MOUSEBUTTONUP:
         mouseButton(&e.button, false, e.button.x, e.button.y);
         break;
+      // Keyboard related events
       case SDL_KEYDOWN:
         keyDown(&e.key);
         break;
       case SDL_KEYUP:
         keyUp(&e.key);
         break;
+      // Window related events
       case SDL_WINDOWEVENT:
         if (globals.debug)
           printf("Window event %d\n", e.window.event);
@@ -303,6 +314,7 @@ render()
 
   SDL_GL_SwapWindow(globals.window);
 
+  // constantly update frame count on rendering
   globals.counters.frameCount++;
 
   if (globals.debug)
@@ -332,16 +344,22 @@ update()
     updateCounters(&globals.counters, t);
     globals.camera.pos = globals.player.pos;
 
+    // When benchmarking turned on, save results onto file
     if(globals.bench)
     {
-      float fr = 1.0/globals.counters.frameTime*1000.0f;
+      // Convert stored variables into same format as that shown in OSD
+      float fr = 1.0 / globals.counters.frameTime*1000.0f;
       float ft = globals.counters.frameTime;
       float ts = 1.0 / globals.counters.triangleTime * 1000.0f;
+      // Pass data into saveBench(...) every second (once elapse time of timer goes over 1000)
       if (!isinf(fr) && timer>1000)
       {
+        /* Append 1 second to timePast every time data is saved,
+         * Once 15 seconds pass, end the program/stop bench marking
+         */
         saveBench(fr, ft, ts);
         globals.timePast += 1000;
-        if (globals.timePast >= 25000)
+        if (globals.timePast >= 15000)
         {
           if (globals.debug)
             printf("Quit\n");
@@ -361,6 +379,7 @@ init()
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnable(GL_DEPTH_TEST);
 
+  // Set default light count
   globals.nLights = 1;
   enableLights(globals.nLights);
 
@@ -371,7 +390,7 @@ init()
   glColor3f(1.0, 1.0, 1.0);
 
   globals.drawingFlags.tess[0] = 8;
-  globals.drawingFlags.tess[1] = 8;
+  globals.drawingFlags.tess[1] = globals.drawingFlags.tess[0];
   globals.drawingFlags.wireframe = false;
   globals.drawingFlags.textures = true;
   globals.drawingFlags.lighting = true;
@@ -383,14 +402,13 @@ init()
   initCamera(&globals.camera);
 
   globals.camera.pos = globals.player.pos;
-  globals.camera.width = 800;
-  globals.camera.height = 600;
+  globals.camera.width = 1920;
+  globals.camera.height = 1080;
 
+  // Enable debug, bench, OSD by default
   globals.wantRedisplay = 1;
   globals.debug = true;
-
   globals.bench = true;
-
   globals.OSD = true;
 
   globals.timePast = 0;
@@ -400,8 +418,8 @@ init()
     initBench
     (
       globals.drawingFlags.tess[0],
-      globals.drawingFlags.rm, //im
-      globals.drawingFlags.wireframe, //rm
+      globals.drawingFlags.rm,
+      globals.drawingFlags.wireframe,
       globals.drawingFlags.lighting,
       globals.nLights,
       globals.drawingFlags.normals
@@ -411,6 +429,7 @@ init()
 
 void mainLoop()
 {
+  // Infinite loop reading events
   while (1)
   {
     eventDispatcher();
@@ -435,7 +454,7 @@ int initGraphics()
   globals.window =
     SDL_CreateWindow("Frogger Using SDL2",
          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-         800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+         1920, 1080, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (!globals.window) {
     fprintf(stderr, "%s:%d: create window failed: %s\n",
       __FILE__, __LINE__, SDL_GetError());
@@ -461,7 +480,7 @@ int
 main(int argc, char **argv)
 {
   glutInit(&argc, argv);
-  glutInitWindowSize(800, 600);
+  glutInitWindowSize(1920, 1080);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   glutCreateWindow("GLUT OSD");
   glewInit();

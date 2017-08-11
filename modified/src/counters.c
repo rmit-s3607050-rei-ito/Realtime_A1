@@ -7,7 +7,6 @@ initCounters(Counters *ctrs)
   ctrs->frameTime = 0.0;
   ctrs->lastTime = 0.0;
   ctrs->interval = 1000.0; // 1 s
-  // Initial triangle count calculated based on default 8 tesselation
   ctrs->triangles = 0;
 }
 
@@ -26,12 +25,22 @@ updateCounters(Counters *ctrs, float t)
 void
 resetTriangleCount(Counters *ctrs)
 {
-  // Reset when tesselating
+  /* Reset the number of triangles when tesselating
+   * Otherwise calling updateTriangleCount() will continually add onto the total
+   */
   ctrs->triangles = 0;
 }
 
 void
 updateTriangleCount(int numTriangles, Counters *ctrs)
 {
+  /* Updates called when initializing:
+   * - Player (Sphere)
+   * - Level (Grid)
+   * - Cars (Cubes)
+   * - Logs (Cylinders)
+   * Each call will add onto the total triangles, which are then used to
+   * calculate triangles per second
+   */
   ctrs->triangles += numTriangles;
 }
