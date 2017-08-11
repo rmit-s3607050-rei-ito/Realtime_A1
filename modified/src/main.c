@@ -336,7 +336,7 @@ update()
     {
       float fr = 1.0/globals.counters.frameTime*1000.0f;
       float ft = globals.counters.frameTime;
-      float ts = globals.counters.triangleTime;
+      float ts = 1.0 / globals.counters.triangleTime * 1000.0f;
       if (!isinf(fr) && timer>1000)
       {
         saveBench(fr, ft, ts);

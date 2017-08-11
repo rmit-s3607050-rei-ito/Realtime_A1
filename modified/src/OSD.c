@@ -51,7 +51,8 @@ displayOSD(Counters *ctrs, DrawingFlags *dfs)
   /* Triangles per second */
   glColor3f(1.0, 1.0, 0.0);
   glRasterPos2i(10, h-3*vs);
-  snprintf(buffer, sizeof buffer, "ts (t/s):  %0.0f", 1.0 / ctrs->triangleTime * milli);
+  snprintf(buffer, sizeof buffer, "ts (t/s):  %0.0f",
+    1.0 / ctrs->triangleTime * milli);
   for (bufp = buffer; *bufp; bufp++)
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, *bufp);
 
