@@ -40,30 +40,30 @@ void saveBench(float tps, float ft, float fr)
 char *fileName(BenchParams bench)
 { // Save file name using various checks for the file name
   // [1]. Start with render mode
-  static char name[STR_LEN] = "RM:";
+  static char name[STR_LEN] = "RM.";
   char str[STR_LEN];
 
   // [2]. Append render mode value, then attach WireFrame key
   if (bench.rMode == VA)
-    strcat(name, "va|WF:");
+    strcat(name, "va-WF.");
   else if (bench.rMode == VBO)
-    strcat(name, "vbo|WF:");
+    strcat(name, "vbo-WF.");
   else
-    strcat(name, "im|WF:");
+    strcat(name, "im-WF.");
 
   // [3]. Append whether WireFrame on or off (wireframe or filled objects)
   if (bench.wf)
-    strcat(name, "on|L:");
+    strcat(name, "on-L.");
   else
-    strcat(name, "off|L:");
+    strcat(name, "off-L.");
 
   /* [4]. Append whether lighting on or off, if on append number of lights.
    * Then append whether normals are displayed or not
    */
   if (bench.lighting)
   {
-    strcat(name, "on|LC:");
-    sprintf(str, "%d|N:", bench.nLights);
+    strcat(name, "on-LC.");
+    sprintf(str, "%d-N.", bench.nLights);
     strcat(name, str);
     if (bench.normals)
       strcat(name, "on");
