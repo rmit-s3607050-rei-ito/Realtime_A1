@@ -7,15 +7,14 @@
 typedef struct
 {
   FILE *file;
-  int tessellation;
-  renderMode iMode;
-  bool rMode;
+  renderMode rMode;
+  bool wf;
   bool lighting;
   bool normals;
   int nLights;
 } BenchParams;
 
-void initBench(int tess, renderMode iMode, bool rMode, bool light, int nLights,
+void initBench(renderMode rMode, bool wf, bool light, int nLights,
   bool normals);
-void saveBench(float fr, float ft, float tps);
+void saveBench(float tps, float ft, float fr);
 char *fileName(BenchParams bench);

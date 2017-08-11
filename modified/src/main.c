@@ -351,21 +351,29 @@ update()
       float fr = 1.0 / globals.counters.frameTime*1000.0f;
       float ft = globals.counters.frameTime;
       float ts = 1.0 / globals.counters.triangleTime * 1000.0f;
-      // Pass data into saveBench(...) every second (once elapse time of timer goes over 1000)
-      if (!isinf(fr) && timer>1000)
+      // Pass data into saveBench(...) every 5 seconds (once elapse time of timer goes over 5000ms)
+      if (!isinf(fr) && timer>5000)
       {
-        /* Append 1 second to timePast every time data is saved,
-         * Once 15 seconds pass, end the program/stop bench marking
-         */
-        saveBench(fr, ft, ts);
-        globals.timePast += 1000;
-        if (globals.timePast >= 15000)
+        saveBench(ts, ft, fr);
+
+        // Check if reached the last tessalation else increase it
+        if (globals.drawingFlags.tess[0] == 1024)
         {
           if (globals.debug)
             printf("Quit\n");
           cleanup();
           quit(0);
         }
+        else
+        {
+          resetTriangleCount(&globals.counters);
+          globals.drawingFlags.tess[0] *= 2;
+          globals.drawingFlags.tess[1] *= 2;
+          generatePlayerGeometry(&globals.player, globals.drawingFlags.tess, &globals.counters);
+          generateLevelGeometry(&globals.level, globals.drawingFlags.tess, &globals.counters);
+        }
+
+        globals.timePast += 5000; //Continue counting
       }
     }
 
@@ -376,7 +384,17 @@ update()
 static void
 init()
 {
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  globals.drawingFlags.wireframe = false;
+  if (globals.drawingFlags.wireframe)
+  {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    printf("Using wireframe rendering\n");
+  }
+  else
+  {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    printf("Using filled rendering\n");
+  }
   glEnable(GL_DEPTH_TEST);
 
   // Set default light count
@@ -391,10 +409,10 @@ init()
 
   globals.drawingFlags.tess[0] = 8;
   globals.drawingFlags.tess[1] = globals.drawingFlags.tess[0];
-  globals.drawingFlags.wireframe = false;
   globals.drawingFlags.textures = true;
   globals.drawingFlags.lighting = true;
   globals.drawingFlags.rm = im;
+  globals.drawingFlags.normals = false; //Initialised to bench
 
   initCounters(&globals.counters);
   initPlayer(&globals.player, &globals.drawingFlags, &globals.counters);
@@ -417,7 +435,6 @@ init()
   {
     initBench
     (
-      globals.drawingFlags.tess[0],
       globals.drawingFlags.rm,
       globals.drawingFlags.wireframe,
       globals.drawingFlags.lighting,
